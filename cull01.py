@@ -30,7 +30,11 @@ def listdir_nohidden_nofolder(path):
 
 
 def get_sibling_directory_contents(sibling_directory):
-    import os
+    '''
+    Input:  name of a directory in the same parent directory as the current
+        working directory
+    Output:  list of the non-hidden files in that directory
+    '''
     sibling_directory_path = get_sibling_directory_path(sibling_directory)
     contents_list = listdir_nohidden_nofolder(sibling_directory_path)
     return(contents_list)
@@ -38,12 +42,13 @@ def get_sibling_directory_contents(sibling_directory):
 
 def get_next_date_for_day_of_week(start_date, day_of_week):
     '''
+    Taken from:
+    https://stackoverflow.com/questions/6558535/find-the-date-for-the-first-monday-after-a-given-a-date
     Starting at the 'start_date' find the next date that is a particular day of
         the week (e.g., Sunday)
     'start_date' is a 'date' object from 'datetime' package
     'day_of_week' designates the day of the week:  Monday = 0, Tuesday = 1, etc.
     '''
-    #from datetime import weekday, timedelta
     import datetime
     days_difference = day_of_week - start_date.weekday()
     if days_difference <= 0:
@@ -93,6 +98,11 @@ def get_comics_to_cull():
 
             dailies ended Jan 3, 2000
             Sundays ended Feb 13, 2000
+
+    So, Sundays before Jan 6, 1952 and dailies after Jan 3, 2000 need to be
+        culled from the scraped comics.
+
+    This function returns a list of these comics' dates for culling
     '''
     start_date = '1950-10-02'
     end_date = '1952-01-05'
@@ -113,22 +123,25 @@ def get_comics_to_cull():
     return(comics_to_cull)
 
 
-def get_culled_comics_list():
-    scrape_folder = '01_scrape_peanuts/peanuts'
-    scraped_list = get_sibling_directory_contents(scrape_folder)
+def get_culled_comics_list(source_directory):
+    '''
+    Returns list of scraped Peanuts comics dates minus the comics that should be
+        culled
+    '''
+    scraped_list = get_sibling_directory_contents(source_directory)
     comics_to_cull = get_comics_to_cull()
     culled_comics = [x for i, x in enumerate(scraped_list)
-                            if x not in comics_to_cull]
+                     if x not in comics_to_cull]
     return(culled_comics)
 
 
-def write_list_to_text_file(a_list, text_file_name, overwrite_or_append = 'a'):
+def write_list_to_text_file(a_list, text_file_name, overwrite_or_append='a'):
     '''
     writes a list of strings to a text file
     appends by default; change to overwriting by setting to 'w' instead of 'a'
     '''
     try:
-        textfile = open(text_file_name, overwrite_or_append, encoding = 'utf-8')
+        textfile = open(text_file_name, overwrite_or_append, encoding='utf-8')
         for element in a_list:
             textfile.write(element)
             textfile.write('\n')
@@ -137,6 +150,20 @@ def write_list_to_text_file(a_list, text_file_name, overwrite_or_append = 'a'):
     return
 
 
-culled_comics = get_culled_comics_list()
-list_filename = 'peanuts_culled01.txt'
-write_list_to_text_file(culled_comics, list_filename, overwrite_or_append = 'w')
+def main():
+    '''
+    Creates list of scraped Peanuts comics (named by their dates of first
+        publication) from the directory where the comics are stored minus the
+        comics that should be culled (because those dates were not included in
+        the original run) and saves list as text file into current working
+        directory
+    '''
+    scrape_folder = '01_scrape_peanuts/peanuts'
+    culled_comics = get_culled_comics_list(scrape_folder)
+    list_filename = 'peanuts_culled01.txt'
+    write_list_to_text_file(culled_comics, list_filename,
+                            overwrite_or_append='w')
+    return()
+
+if __name__ == '__main__':
+    main()

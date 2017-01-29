@@ -158,7 +158,8 @@ def main():
         the original run) and saves list as text file into current working
         directory
     '''
-    scrape_folder = '01_scrape_peanuts/peanuts'
+    import os
+    scrape_folder = os.path.join('01_scrape_peanuts', 'peanuts')
     culled_comics = get_culled_comics_list(scrape_folder)
     list_filename = 'peanuts_culled01.txt'
     write_list_to_text_file(culled_comics, list_filename,
